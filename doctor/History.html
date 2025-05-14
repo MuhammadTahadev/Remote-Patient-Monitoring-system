@@ -262,6 +262,8 @@
     <div id="chartErrorArea"></div>
 
     <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const patientId = urlParams.get("patient_id");
       const periodSelect = document.getElementById("period");
       const heartRateCanvasCtx = document
         .getElementById("heartRateChart")
@@ -280,7 +282,11 @@
 
       async function fetchData(period = 24) {
         try {
-          const response = await fetch(`history.php?period=${period}`);
+          let apiUrl = `history.php?period=${period}`;
+          if (patientId) {
+            apiUrl += `&patient_id=${patientId}`;
+          }
+          const response = await fetch(apiUrl);
           if (!response.ok) {
             let errorMsg = `HTTP error! status: ${response.status}`;
             try {

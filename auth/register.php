@@ -140,6 +140,7 @@ while ($org = $organizations->fetch_assoc()) {
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            margin: 0 10px;
         }
 
         .modal-content .btn:hover {
@@ -259,14 +260,23 @@ while ($org = $organizations->fetch_assoc()) {
             <input type="password" id="confirm_password" name="confirm_password" required minlength="8" aria-describedby="confirm_password_error">
             <small id="confirm_password_error" class="error-message">Passwords must match.</small>
         </div>
-        <button type="submit" class="btn">Register</button>
+        <button type="button" id="register_button" class="btn">Register</button>
     </form>
 
-    <!-- Modal for error message -->
+    <!-- Error Modal -->
     <div id="error_modal" class="modal">
         <div class="modal-content">
             <p id="error_message"></p>
             <button type="button" id="close_modal" class="btn">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm_modal" class="modal">
+        <div class="modal-content">
+            <p>Please recheck all details before proceeding. Once submitted, these details cannot be changed.</p>
+            <button type="button" id="proceed_button" class="btn">Proceed</button>
+            <button type="button" id="check_again_button" class="btn">Check Again</button>
         </div>
     </div>
 
@@ -303,6 +313,18 @@ function showErrorModal(message) {
 // Hide modal
 function hideErrorModal() {
     const modal = document.getElementById('error_modal');
+    modal.style.display = 'none';
+}
+
+// Show confirmation modal
+function showConfirmModal() {
+    const modal = document.getElementById('confirm_modal');
+    modal.style.display = 'flex';
+}
+
+// Hide confirmation modal
+function hideConfirmModal() {
+    const modal = document.getElementById('confirm_modal');
     modal.style.display = 'none';
 }
 
@@ -357,14 +379,15 @@ document.getElementById('load_doctors').addEventListener('click', function() {
     });
 });
 
-// Validate form on submission
-document.getElementById('register_form').addEventListener('submit', function(event) {
-    // Check if passwords match
+// Handle register button click to show confirmation modal
+document.getElementById('register_button').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent immediate form submission
+
+    // Validate form before showing modal
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
     if (password !== confirmPassword) {
         showErrorModal('Passwords do not match.');
-        event.preventDefault(); // Stop form submission
         return;
     }
 
@@ -377,9 +400,22 @@ document.getElementById('register_form').addEventListener('submit', function(eve
         const errorMessage = validateDoctorOrganization(doctorId, patientOrgId, allDoctors, allOrganizations);
         if (errorMessage) {
             showErrorModal(errorMessage);
-            event.preventDefault(); // Stop form submission
+            return;
         }
     }
+
+    // If validation passes, show confirmation modal
+    showConfirmModal();
+});
+
+// Handle proceed button in confirmation modal
+document.getElementById('proceed_button').addEventListener('click', function() {
+    document.getElementById('register_form').submit(); // Submit the form
+});
+
+// Handle check again button in confirmation modal
+document.getElementById('check_again_button').addEventListener('click', function() {
+    hideConfirmModal(); // Close modal to allow user to review
 });
 
 // Real-time password match feedback
@@ -405,7 +441,7 @@ document.getElementById('password').addEventListener('input', function() {
     errorMessage.style.display = 'none';
 });
 
-// Close modal on button click
+// Close error modal on button click
 document.getElementById('close_modal').addEventListener('click', hideErrorModal);
 </script>
 </body>

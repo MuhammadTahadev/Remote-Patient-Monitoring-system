@@ -132,6 +132,9 @@ displayAlert();
                                     <a href="alert_history.php?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-sm action-btn" title="Alert History">
                                         <i class="fas fa-history"></i>
                                     </a>
+                                    <a href="History.html?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-sm action-btn" title="View Trends">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

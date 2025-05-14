@@ -65,15 +65,211 @@ if ($organization_id !== null) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Manage Doctors</title>
-    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+        /* Define CSS Variables for consistent theming */
+        :root {
+            --primary: #2C7A7B; /* Teal primary color */
+            --primary-dark: #234E52; /* Darker teal for depth */
+            --secondary: #4FD1C5; /* Light teal for accents */
+            --secondary-dark: #38A169; /* Slightly darker secondary for contrast */
+            --dark-gray: #4A5568; /* Neutral gray for text */
+        }
+
+        /* Doctor Dashboard Modern Styles */
+        .doctor-dashboard {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .doctor-dashboard h2 {
+            color: var(--primary-dark);
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .doctor-dashboard h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        /* Back Link */
+        .back-link {
+            margin: 1rem 2rem;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-dark);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 122, 123, 0.3);
+        }
+
+        .btn-back i {
+            margin-right: 0.5rem;
+        }
+
+        /* Activity Table */
+        .activity-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-table thead th {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+
+        .activity-table th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .activity-table th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        .activity-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .activity-table tr:hover td {
+            background-color: rgba(44, 122, 123, 0.03); /* Matches primary teal */
+        }
+
+        /* Buttons */
+        .btn-link {
+            color: var(--primary);
+            background: none;
+            border: none;
+            padding: 0.5rem 0;
+            margin-right: 1rem;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-link:hover {
+            color: var(--secondary-dark);
+            transform: translateX(3px);
+        }
+
+        .btn-link i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Messages */
+        .error-message {
+            color: #E53E3E; /* Keep red for errors for clarity */
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            color: var(--secondary-dark);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .activity-table {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .doctor-dashboard {
+                padding: 1.5rem;
+            }
+
+            .activity-table {
+                font-size: 0.9rem;
+            }
+
+            .activity-table th,
+            .activity-table td {
+                padding: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .doctor-dashboard h2 {
+                font-size: 1.9rem;
+            }
+
+            .activity-table {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .doctor-dashboard {
+                padding: 1rem;
+            }
+
+            .back-link {
+                margin: 1rem;
+            }
+
+            .activity-table {
+                min-width: 600px;
+                overflow-x: auto;
+                display: block;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="back-link">
+        <a href="dashboard.php" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
     <div class="doctor-dashboard">
         <h2>Manage Doctors</h2>
         <?php if (isset($error)): ?>
-            <p style="color:red;"><?php echo htmlspecialchars($error); ?></p>
+            <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
         <?php elseif (isset($_GET['msg'])): ?>
-            <p style="color:green;"><?php echo htmlspecialchars($_GET['msg']); ?></p>
+            <p class="success-message"><?php echo htmlspecialchars($_GET['msg']); ?></p>
         <?php endif; ?>
         <?php if (count($doctors) > 0): ?>
         <table class="activity-table">
@@ -104,6 +300,7 @@ if ($organization_id !== null) {
         <p>No doctors found in your organization.</p>
         <?php endif; ?>
     </div>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
 <?php require_once '../includes/footer.php'; ?>

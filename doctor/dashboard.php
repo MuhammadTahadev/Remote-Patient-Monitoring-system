@@ -70,6 +70,7 @@ $alert_history_count = $stmt->get_result()->fetch_row()[0];
                 <a href="patients.php" class="btn btn-primary">View All</a>
             </div>
         </div>
+        <!-- Removed Patients Trends card as per user request -->
         
         <div class="dashboard-card">
             <div class="card-icon">
@@ -161,10 +162,11 @@ $alert_history_count = $stmt->get_result()->fetch_row()[0];
                         <tr>
                             <td><?= htmlspecialchars($patient['Full_Name']) ?></td>
                             <td><?= date('M j, Y g:i A', strtotime($patient['last_reading'])) ?></td>
-                            <td>
-                                <a href="vitals.php?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-link">View</a>
-                                <a href="chat.php?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-link">Chat with Patient</a>
-                            </td>
+                        <td>
+                            <a href="vitals.php?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-link">View</a>
+                            <a href="chat.php?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-link">Chat with Patient</a>
+                            <a href="History.html?patient_id=<?= $patient['Patient_ID'] ?>" class="btn-link">View Trends</a>
+                        </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
