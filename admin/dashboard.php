@@ -23,21 +23,68 @@ if ($result->num_rows === 1) {
     $organization_id = null;
 }
 
-// Get counts of Doctors and Patients linked to this organization
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reinstate_user_id'])) {
+    $reinstate_user_id = (int)$_POST['reinstate_user_id'];
+
+    // Verify user belongs to admin's organization before reinstating
+    $stmt = $conn->prepare("
+        SELECT u.User_ID
+        FROM User u
+        LEFT JOIN Doctor d ON u.User_ID = d.User_ID
+        LEFT JOIN Patient p ON u.User_ID = p.User_ID
+        WHERE u.User_ID = ? AND (d.Organization_ID = ? OR p.Organization_ID = ?)
+    ");
+    $stmt->bind_param("iii", $reinstate_user_id, $organization_id, $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 1) {
+        // Update user status to active
+        $stmt = $conn->prepare("UPDATE User SET status = 'active' WHERE User_ID = ?");
+        $stmt->bind_param("i", $reinstate_user_id);
+        $stmt->execute();
+
+        header("Location: dashboard.php?msg=User+reinstated+successfully");
+        exit();
+    } else {
+        $error = "Invalid user or unauthorized action.";
+    }
+}
+
 $doctor_count = 0;
 $patient_count = 0;
+$archived_users = [];
+
 if ($organization_id !== null) {
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Doctor WHERE Organization_ID = ?");
+    // Get active doctors count
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Doctor d JOIN User u ON d.User_ID = u.User_ID WHERE d.Organization_ID = ? AND u.status = 'active'");
     $stmt->bind_param("i", $organization_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $doctor_count = $result->fetch_assoc()['count'];
 
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Patient WHERE Organization_ID = ?");
+    // Get active patients count
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Patient p JOIN User u ON p.User_ID = u.User_ID WHERE p.Organization_ID = ? AND u.status = 'active'");
     $stmt->bind_param("i", $organization_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $patient_count = $result->fetch_assoc()['count'];
+
+    // Get archived users (doctors and patients) for this organization
+    $stmt = $conn->prepare("
+        SELECT u.User_ID, u.Full_Name, u.EMAIL, r.Role_Name
+        FROM User u
+        JOIN Role r ON u.Role_ID = r.Role_ID
+        LEFT JOIN Doctor d ON u.User_ID = d.User_ID AND d.Organization_ID = ?
+        LEFT JOIN Patient p ON u.User_ID = p.User_ID AND p.Organization_ID = ?
+        WHERE u.status = 'archived' AND (d.Doctor_ID IS NOT NULL OR p.Patient_ID IS NOT NULL)
+    ");
+    $stmt->bind_param("ii", $organization_id, $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $archived_users[] = $row;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -228,6 +275,40 @@ if ($organization_id !== null) {
                     <p>Patients in your organization</p>
                 </div>
             </a>
+        </div>
+
+        <!-- Archived Users Section -->
+        <div class="archived-users-section" style="margin-top: 2rem;">
+            <h2>Archived Users</h2>
+            <?php if (count($archived_users) > 0): ?>
+            <table class="activity-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($archived_users as $user): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($user['Full_Name']); ?></td>
+                        <td><?php echo htmlspecialchars($user['EMAIL']); ?></td>
+                        <td><?php echo htmlspecialchars($user['Role_Name']); ?></td>
+                        <td>
+                            <form method="post" action="dashboard.php" style="margin:0;">
+                                <input type="hidden" name="reinstate_user_id" value="<?php echo $user['User_ID']; ?>" />
+                                <button type="submit" class="btn-link" style="color: var(--primary); background:none; border:none; cursor:pointer;">Reinstate</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php else: ?>
+            <p>No archived users found.</p>
+            <?php endif; ?>
         </div>
     </div>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>

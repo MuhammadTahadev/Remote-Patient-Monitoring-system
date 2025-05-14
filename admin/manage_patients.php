@@ -22,34 +22,39 @@ if ($result->num_rows === 1) {
     $organization_id = null;
 }
 
-// Handle delete action
+// Handle delete action (soft delete)
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $patient_id = (int)$_GET['delete'];
 
-    // Verify patient belongs to admin's organization before deleting
-    $stmt = $conn->prepare("SELECT Patient_ID FROM Patient WHERE Patient_ID = ? AND Organization_ID = ?");
+    // Verify patient belongs to admin's organization before soft deleting
+    $stmt = $conn->prepare("SELECT p.Patient_ID, p.User_ID FROM Patient p WHERE p.Patient_ID = ? AND p.Organization_ID = ?");
     $stmt->bind_param("ii", $patient_id, $organization_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows === 1) {
-        $stmt = $conn->prepare("DELETE FROM Patient WHERE Patient_ID = ?");
-        $stmt->bind_param("i", $patient_id);
+        $patient = $result->fetch_assoc();
+        $user_id = $patient['User_ID'];
+
+        // Soft delete by updating User.status to 'archived'
+        $stmt = $conn->prepare("UPDATE User SET status = 'archived' WHERE User_ID = ?");
+        $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        header("Location: manage_patients.php?msg=Patient+deleted+successfully");
+
+        header("Location: manage_patients.php?msg=Patient+archived+successfully");
         exit();
     } else {
         $error = "Invalid patient or unauthorized action.";
     }
 }
 
-// Get list of patients in the organization
+// Get list of patients in the organization excluding archived users
 $patients = [];
 if ($organization_id !== null) {
     $stmt = $conn->prepare("
         SELECT p.Patient_ID, u.Full_Name, u.EMAIL
         FROM Patient p
         JOIN User u ON p.User_ID = u.User_ID
-        WHERE p.Organization_ID = ?
+        WHERE p.Organization_ID = ? AND u.status = 'active'
     ");
     $stmt->bind_param("i", $organization_id);
     $stmt->execute();

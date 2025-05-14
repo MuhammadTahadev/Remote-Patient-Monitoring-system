@@ -22,34 +22,39 @@ if ($result->num_rows === 1) {
     $organization_id = null;
 }
 
-// Handle delete action
+// Handle delete action (soft delete)
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $doctor_id = (int)$_GET['delete'];
 
-    // Verify doctor belongs to admin's organization before deleting
-    $stmt = $conn->prepare("SELECT Doctor_ID FROM Doctor WHERE Doctor_ID = ? AND Organization_ID = ?");
+    // Verify doctor belongs to admin's organization before soft deleting
+    $stmt = $conn->prepare("SELECT d.Doctor_ID, d.User_ID FROM Doctor d WHERE d.Doctor_ID = ? AND d.Organization_ID = ?");
     $stmt->bind_param("ii", $doctor_id, $organization_id);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows === 1) {
-        $stmt = $conn->prepare("DELETE FROM Doctor WHERE Doctor_ID = ?");
-        $stmt->bind_param("i", $doctor_id);
+        $doctor = $result->fetch_assoc();
+        $user_id = $doctor['User_ID'];
+
+        // Soft delete by updating User.status to 'archived'
+        $stmt = $conn->prepare("UPDATE User SET status = 'archived' WHERE User_ID = ?");
+        $stmt->bind_param("i", $user_id);
         $stmt->execute();
-        header("Location: manage_doctors.php?msg=Doctor+deleted+successfully");
+
+        header("Location: manage_doctors.php?msg=Doctor+archived+successfully");
         exit();
     } else {
         $error = "Invalid doctor or unauthorized action.";
     }
 }
 
-// Get list of doctors in the organization
+// Get list of doctors in the organization excluding archived users
 $doctors = [];
 if ($organization_id !== null) {
     $stmt = $conn->prepare("
         SELECT d.Doctor_ID, u.Full_Name, d.Specialization, d.License_Number
         FROM Doctor d
         JOIN User u ON d.User_ID = u.User_ID
-        WHERE d.Organization_ID = ?
+        WHERE d.Organization_ID = ? AND u.status = 'active'
     ");
     $stmt->bind_param("i", $organization_id);
     $stmt->execute();

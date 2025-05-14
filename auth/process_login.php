@@ -13,34 +13,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
-        
+
+        // Check if user is active
+        if ($user['status'] !== 'active') {
+            setAlert("User archived by the admin", "error");
+            header("Location: login.php");
+            exit();
+        }
+
+        // Verify password
         if (verifyPassword($password, $user['Password'])) {
             // Set session variables
             $_SESSION['user_id'] = $user['User_ID'];
             $_SESSION['full_name'] = $user['Full_Name'];
             $_SESSION['role_name'] = $user['Role_Name'];
             $_SESSION['email'] = $user['EMAIL'];
-            
+
             // Redirect based on role
             header("Location: ../" . strtolower($user['Role_Name']) . "/dashboard.php");
             exit();
         } else {
-            setAlert("Invalid email or password", "error");
-            session_unset();  // Clear session data
-            session_destroy(); // Destroy session
+            setAlert("Invalid credentials", "error");
             header("Location: login.php");
             exit();
         }
-        
     } else {
-        setAlert("Invalid email or password", "error");
+        setAlert("Invalid credentials", "error");
+        header("Location: login.php");
+        exit();
     }
-    
-    header("Location: login.php");
-    exit();
 } else {
     header("Location: login.php");
     exit();
