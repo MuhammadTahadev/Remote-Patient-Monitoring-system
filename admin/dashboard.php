@@ -7,15 +7,150 @@ require_once '../includes/functions.php';
 // Ensure only doctors can access
 requireRole('Admin');
 ?>
+<?php
+require_once '../config/config.php';
+require_once '../includes/header.php';
+require_once '../includes/auth.php';
+require_once '../includes/functions.php';
+
+// Ensure only admins can access
+requireRole('Admin');
+
+// Get logged-in user ID
+$user_id = $_SESSION['user_id'];
+
+// Get organization_id for the admin
+$stmt = $conn->prepare("SELECT Organization_ID FROM Admin WHERE User_ID = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $org = $result->fetch_assoc();
+    $organization_id = $org['Organization_ID'];
+} else {
+    // If no organization found, set to null or handle error
+    $organization_id = null;
+}
+
+// Get Doctors linked to this organization
+$doctors = [];
+if ($organization_id !== null) {
+    $stmt = $conn->prepare("
+        SELECT d.Doctor_ID, u.Full_Name, d.Specialization, d.License_Number
+        FROM Doctor d
+        JOIN User u ON d.User_ID = u.User_ID
+        WHERE d.Organization_ID = ?
+    ");
+    $stmt->bind_param("i", $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $doctors[] = $row;
+    }
+}
+
+// Get Patients linked to this organization
+$patients = [];
+if ($organization_id !== null) {
+    $stmt = $conn->prepare("
+        SELECT p.Patient_ID, u.Full_Name, u.EMAIL
+        FROM Patient p
+        JOIN User u ON p.User_ID = u.User_ID
+        WHERE p.Organization_ID = ?
+    ");
+    $stmt->bind_param("i", $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $patients[] = $row;
+    }
+}
+
+?>
+<?php
+require_once '../config/config.php';
+require_once '../includes/header.php';
+require_once '../includes/auth.php';
+require_once '../includes/functions.php';
+
+// Ensure only admins can access
+requireRole('Admin');
+
+// Get logged-in user ID
+$user_id = $_SESSION['user_id'];
+
+// Get organization_id for the admin
+$stmt = $conn->prepare("SELECT Organization_ID FROM Admin WHERE User_ID = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $org = $result->fetch_assoc();
+    $organization_id = $org['Organization_ID'];
+} else {
+    // If no organization found, set to null or handle error
+    $organization_id = null;
+}
+
+// Get counts of Doctors and Patients linked to this organization
+$doctor_count = 0;
+$patient_count = 0;
+if ($organization_id !== null) {
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Doctor WHERE Organization_ID = ?");
+    $stmt->bind_param("i", $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $doctor_count = $result->fetch_assoc()['count'];
+
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Patient WHERE Organization_ID = ?");
+    $stmt->bind_param("i", $organization_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $patient_count = $result->fetch_assoc()['count'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
 </head>
 <body>
-    Welcome To Admin Dashboard  
+    <div class="admin-dashboard">
+        <h2>Admin Dashboard</h2>
+        <div class="dashboard-cards">
+            <a href="manage_doctors.php" class="dashboard-card" style="text-decoration:none;">
+                <div class="card-icon"><i class="fas fa-user-md"></i></div>
+                <div class="card-content">
+                    <h3>Manage Doctors</h3>
+                    <div class="card-value"><?php echo $doctor_count; ?></div>
+                    <p>Doctors in your organization</p>
+                </div>
+            </a>
+            <a href="manage_patients.php" class="dashboard-card" style="text-decoration:none;">
+                <div class="card-icon"><i class="fas fa-procedures"></i></div>
+                <div class="card-content">
+                    <h3>Manage Patients</h3>
+                    <div class="card-value"><?php echo $patient_count; ?></div>
+                    <p>Patients in your organization</p>
+                </div>
+            </a>
+        </div>
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="dashboard-cards">
+                <a href="manage_doctors.php" class="dashboard-card btn-primary" style="text-align:center;">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+                <a href="manage_patients.php" class="dashboard-card btn-primary" style="text-align:center;">
+                    <i class="fas fa-procedures"></i> Manage Patients
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
 
