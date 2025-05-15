@@ -297,7 +297,36 @@ if ($organization_id !== null) {
                         <td><?php echo htmlspecialchars($user['EMAIL']); ?></td>
                         <td><?php echo htmlspecialchars($user['Role_Name']); ?></td>
                         <td>
-                            <form method="post" action="dashboard.php" style="margin:0;">
+                            <a href="<?php 
+                                if ($user['Role_Name'] === 'Doctor') {
+                                    // Fetch Doctor_ID for this User_ID
+                                    $doctor_id = null;
+                                    $stmt_doctor = $conn->prepare("SELECT Doctor_ID FROM Doctor WHERE User_ID = ?");
+                                    $stmt_doctor->bind_param("i", $user['User_ID']);
+                                    $stmt_doctor->execute();
+                                    $result_doctor = $stmt_doctor->get_result();
+                                    if ($result_doctor->num_rows === 1) {
+                                        $doctor = $result_doctor->fetch_assoc();
+                                        $doctor_id = $doctor['Doctor_ID'];
+                                    }
+                                    echo 'archive_doctors.php?id=' . $doctor_id;
+                                } elseif ($user['Role_Name'] === 'Patient') {
+                                    // Fetch Patient_ID for this User_ID
+                                    $patient_id = null;
+                                    $stmt_patient = $conn->prepare("SELECT Patient_ID FROM Patient WHERE User_ID = ?");
+                                    $stmt_patient->bind_param("i", $user['User_ID']);
+                                    $stmt_patient->execute();
+                                    $result_patient = $stmt_patient->get_result();
+                                    if ($result_patient->num_rows === 1) {
+                                        $patient = $result_patient->fetch_assoc();
+                                        $patient_id = $patient['Patient_ID'];
+                                    }
+                                    echo 'archive_patients.php?id=' . $patient_id;
+                                } else {
+                                    echo '#';
+                                }
+                            ?>" class="btn-link" style="margin-right: 10px; color: var(--primary); text-decoration: underline;">View</a>
+                            <form method="post" action="dashboard.php" style="display:inline; margin:0;">
                                 <input type="hidden" name="reinstate_user_id" value="<?php echo $user['User_ID']; ?>" />
                                 <button type="submit" class="btn-link" style="color: var(--primary); background:none; border:none; cursor:pointer;">Reinstate</button>
                             </form>

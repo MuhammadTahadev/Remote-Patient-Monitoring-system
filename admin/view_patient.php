@@ -28,11 +28,11 @@ if ($patient_id <= 0) {
     die("Invalid patient ID.");
 }
 
-// Verify patient belongs to admin's organization
-$stmt = $conn->prepare("SELECT p.Patient_ID, u.Full_Name, u.EMAIL
+// Verify patient belongs to admin's organization or is archived (allow viewing archived patients regardless of organization)
+$stmt = $conn->prepare("SELECT p.Patient_ID, u.Full_Name, u.EMAIL, p.Emergency_Contact_Number, p.Address
                        FROM Patient p
                        JOIN User u ON p.User_ID = u.User_ID
-                       WHERE p.Patient_ID = ? AND p.Organization_ID = ?");
+                       WHERE p.Patient_ID = ? AND (p.Organization_ID = ? OR u.status = 'archived')");
 $stmt->bind_param("ii", $patient_id, $organization_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -240,16 +240,18 @@ $patient = $result->fetch_assoc();
     <div class="patient-dashboard">
         <h2>Patient Profile: <?php echo htmlspecialchars($patient['Full_Name']); ?></h2>
         <p><strong>Email:</strong> <?php echo htmlspecialchars($patient['EMAIL']); ?></p>
+        <p><strong>Emergency Contact Number:</strong> <?php echo htmlspecialchars($patient['Emergency_Contact_Number']); ?></p>
+        <p><strong>Address:</strong> <?php echo htmlspecialchars($patient['Address']); ?></p>
 
         <div class="dashboard-cards">
             <a href="patient_vitals.php?patient_id=<?php echo $patient_id; ?>" class="dashboard-card btn-primary">
                 <i class="fas fa-heartbeat"></i> View Vitals
             </a>
-            <a href="chat.php?patient_id=<?php echo $patient_id; ?>" class="dashboard-card btn-primary">
-                <i class="fas fa-comments"></i> Chat with Patient
-            </a>
             <a href="patient/reports.php?patient_id=<?php echo $patient_id; ?>" class="dashboard-card btn-primary">
                 <i class="fas fa-file-medical"></i> View Reports
+            </a>
+            <a href="History.html?patient_id=<?php echo $patient_id; ?>" class="dashboard-card btn-primary">
+                <i class="fas fa-chart-line"></i> View Trends
             </a>
         </div>
     </div>

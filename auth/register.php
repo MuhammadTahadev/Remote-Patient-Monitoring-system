@@ -200,8 +200,8 @@ while ($org = $organizations->fetch_assoc()) {
             </div>
             <div class="form-group">
                 <label for="emergency_contact_number">Emergency Contact Number:</label>
-                <input type="tel" id="emergency_contact_number" name="emergency_contact_number" pattern="[0-9]{10}" title="Enter a 10-digit phone number">
-                <small class="error-message">Enter a 10-digit phone number.</small>
+                <input type="tel" id="emergency_contact_number" name="emergency_contact_number" pattern="[0-9]{11}" title="Enter a 11-digit phone number">
+                <small class="error-message">Enter a 11-digit phone number.</small>
             </div>
             <div class="form-group">
                 <label for="address">Address:</label>

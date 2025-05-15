@@ -293,7 +293,6 @@ if ($organization_id !== null) {
                     <td><?php echo htmlspecialchars($doctor['Specialization']); ?></td>
                     <td><?php echo htmlspecialchars($doctor['License_Number']); ?></td>
                     <td>
-                        <a href="send_message.php?to=doctor&id=<?php echo $doctor['Doctor_ID']; ?>" class="btn-link">Send Message</a>
                         <a href="manage_doctors.php?delete=<?php echo $doctor['Doctor_ID']; ?>" class="btn-link" onclick="return confirm('Are you sure you want to delete this doctor?');">Disable</a>
                         <a href="view_doctor.php?id=<?php echo $doctor['Doctor_ID']; ?>" class="btn-link">View</a>
                     </td>

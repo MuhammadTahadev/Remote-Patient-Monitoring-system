@@ -6,53 +6,38 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
 
-// Verify authentication and role (Patient or Doctor)
-if (!isLoggedIn() || (!hasRole('Doctor') || (!hasRole('Admin')))) {
+// Verify authentication and role (Admin)
+if (!isLoggedIn() || !hasRole('Admin')) {
     http_response_code(401);
     die(json_encode(['error' => 'Unauthorized']));
 }
 
-// Determine patient ID based on role
+// Get logged-in user ID and admin organization ID
 $user_id = $_SESSION['user_id'];
-$patient_id = null;
-
-if (hasRole('Patient')) {
-    // For patients, use their own patient ID from session
-    $patient_id = $_SESSION['patient_id'];
-} elseif (hasRole('Doctor')) {
-    // For doctors, get patient ID from query parameter and verify organization
-    if (!isset($_GET['patient_id']) || !is_numeric($_GET['patient_id'])) {
-        http_response_code(400);
-        die(json_encode(['error' => 'Invalid or missing patient ID']));
-    }
-    $patient_id = (int)$_GET['patient_id'];
-
-    // Get doctor's organization ID
-    $stmt = $conn->prepare("SELECT Organization_ID FROM Doctor WHERE User_ID = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows !== 1) {
-        http_response_code(403);
-        die(json_encode(['error' => 'Doctor organization not found']));
-    }
-    $doctor_org = $result->fetch_assoc()['Organization_ID'];
-
-    // Verify patient belongs to the same organization
-    $stmt = $conn->prepare("SELECT Patient_ID FROM Patient WHERE Patient_ID = ? AND Organization_ID = ?");
-    $stmt->bind_param("ii", $patient_id, $doctor_org);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows !== 1) {
-        http_response_code(403);
-        die(json_encode(['error' => 'Unauthorized access to patient data']));
-    }
+$stmt = $conn->prepare("SELECT Organization_ID FROM Admin WHERE User_ID = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows !== 1) {
+    http_response_code(403);
+    die(json_encode(['error' => 'Admin organization not found']));
 }
+$admin_org = $result->fetch_assoc()['Organization_ID'];
 
-// Ensure patient ID is valid
-if (!$patient_id) {
+// Get patient ID from query parameter and verify organization
+if (!isset($_GET['patient_id']) || !is_numeric($_GET['patient_id'])) {
     http_response_code(400);
-    die(json_encode(['error' => 'Invalid patient ID']));
+    die(json_encode(['error' => 'Invalid or missing patient ID']));
+}
+$patient_id = (int)$_GET['patient_id'];
+
+$stmt = $conn->prepare("SELECT Patient_ID FROM Patient WHERE Patient_ID = ? AND Organization_ID = ?");
+$stmt->bind_param("ii", $patient_id, $admin_org);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows !== 1) {
+    http_response_code(403);
+    die(json_encode(['error' => 'Unauthorized access to patient data']));
 }
 
 // Get time period from request (default: 24 hours)

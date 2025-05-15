@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Health History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../assets/css/main.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      /* Health History Modern Styles */
+      body {
+        background-color: var(--light);
+        color: var(--dark-gray);
+        padding: 20px;
+      }
+
+      h1 {
+        color: var(--primary-dark);
+        font-size: 2.2rem;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        position: relative;
+        padding-bottom: 1rem;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--secondary);
+        border-radius: 2px;
+      }
+
+      .back-link {
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background-color: var(--primary-dark);
+        color: white;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .btn-back:hover {
+        background-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(96, 108, 56, 0.3);
+      }
+
+      .btn-back i {
+        margin-right: 0.5rem;
+      }
+
+      /* Period Selector */
+      #period-selector {
+        margin: 1.5rem auto;
+        max-width: 300px;
+        text-align: center;
+      }
+
+      #period-selector label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--primary-dark);
+        font-weight: 500;
+      }
+
+      #period {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--gray);
+        border-radius: 8px;
+        background-color: white;
+        font-size: 1rem;
+        color: var(--dark-gray);
+        transition: all 0.3s ease;
+      }
+
+      #period:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(96, 108, 56, 0.2);
+      }
+
+      /* Charts Area */
+      .charts-area {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+
+      .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chart-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 0;
+        background: var(--secondary);
+        transition: height 0.3s ease;
+      }
+
+      .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        border-color: rgba(221, 161, 94, 0.2);
+      }
+
+      .chart-card:hover::before {
+        height: 100%;
+      }
+
+      .chart-card h2 {
+        color: var(--primary-dark);
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+      }
+
+      /* Error Message Styling */
+      #chartErrorArea {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 2rem auto;
+        max-width: 800px;
+        border: 1px solid #f5c6cb;
+        display: none;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 992px) {
+        .charts-area {
+          grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .charts-area {
+          grid-template-columns: 1fr;
+        }
+
+        .chart-card {
+          padding: 1.25rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 1.6rem;
+          padding-bottom: 0.75rem;
+        }
+
+        h1::after {
+          width: 60px;
+          height: 3px;
+        }
+
+        .btn-back {
+          padding: 0.6rem 1.2rem;
+          font-size: 0.9rem;
+        }
+
+        .chart-container {
+          height: 250px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Your Health History</h1>
+    <div class="back-link">
+      <a href="dashboard.php" class="btn-back"
+        ><i class="fas fa-arrow-left"></i> Back to Dashboard</a
+      >
+    </div>
+
+    <div id="period-selector">
+      <label for="period">Time Period:</label>
+      <select id="period">
+        <option value="1">Last 1 Hour</option>
+        <option value="6">Last 6 Hours</option>
+        <option value="12">Last 12 Hours</option>
+        <option value="24" selected>Last 24 Hours</option>
+        <option value="48">Last 48 Hours</option>
+        <option value="168">Last 7 Days</option>
+      </select>
+    </div>
+
+    <div class="charts-area">
+      <div class="chart-card">
+        <h2>Heart Rate</h2>
+        <div class="chart-container">
+          <canvas id="heartRateChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Blood Pressure</h2>
+        <div class="chart-container">
+          <canvas id="bloodPressureChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Glucose Level</h2>
+        <div class="chart-container">
+          <canvas id="glucoseChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2>Oxygen Saturation</h2>
+        <div class="chart-container">
+          <canvas id="oxygenChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div id="chartErrorArea"></div>
+
+    <script>
+      const periodSelect = document.getElementById("period");
+      const heartRateCanvasCtx = document
+        .getElementById("heartRateChart")
+        .getContext("2d");
+      const bloodPressureCanvasCtx = document
+        .getElementById("bloodPressureChart")
+        .getContext("2d");
+      const glucoseCanvasCtx = document
+        .getElementById("glucoseChart")
+        .getContext("2d");
+      const oxygenCanvasCtx = document
+        .getElementById("oxygenChart")
+        .getContext("2d");
+
+      let heartRateChart, bloodPressureChart, glucoseChart, oxygenChart;
+
+      async function fetchData(period = 24) {
+        try {
+          // Parse patient_id from URL query string
+          const urlParams = new URLSearchParams(window.location.search);
+          const patientId = urlParams.get('patient_id');
+          if (!patientId) {
+            displayErrorMessage('Missing patient ID in URL');
+            return;
+          }
+          const response = await fetch(`History.php?period=${period}&patient_id=${patientId}`);
+          if (!response.ok) {
+            let errorMsg = `HTTP error! status: ${response.status}`;
+            try {
+              const errorData = await response.json();
+              errorMsg += `: ${errorData.error || "Unknown API error"}`;
+            } catch (e) {
+              errorMsg += `: ${await response.text()}`;
+            }
+            throw new Error(errorMsg);
+          }
+          const data = await response.json();
+
+          if (data.success && data.data) {
+            updateCharts(data.data);
+          } else {
+            console.error(
+              "Error fetching data:",
+              data.error || "Invalid data format received."
+            );
+            displayErrorMessage(
+              `Could not load chart data: ${
+                data.error || "Invalid data format"
+              }`
+            );
+          }
+        } catch (error) {
+          console.error("Could not fetch data:", error);
+          displayErrorMessage(
+            `Could not connect to fetch chart data. ${error.message}`
+          );
+        }
+      }
+
+      function updateCharts(chartData) {
+        const labels = chartData.labels || [];
+
+        clearErrorMessage();
+
+        const colors = {
+          heartRate: "#e53935",
+          systolic: "#8E24AA",
+          diastolic: "#5E35B1",
+          glucose: "#FB8C00",
+          oxygen: "#1E88E5",
+        };
+
+        function destroyChart(chartInstance) {
+          if (chartInstance) {
+            chartInstance.destroy();
+          }
+        }
+
+        function createSingleLineChart(
+          canvasContext,
+          existingChartInstance,
+          label,
+          data,
+          color,
+          yAxisLabel
+        ) {
+          destroyChart(existingChartInstance);
+
+          return new Chart(canvasContext, {
+            type: "line",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: label,
+                  data: data || [],
+                  borderColor: color,
+                  borderWidth: 2,
+                  fill: false,
+                  tension: 0.1,
+                  pointRadius: 3,
+                  pointBackgroundColor: color,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: false,
+                  title: { display: true, text: yAxisLabel },
+                },
+                x: {
+                  title: { display: true, text: "Date & Time" },
+                  ticks: {
+                    maxTicksLimit: 10,
+                    autoSkip: true,
+                  },
+                },
+              },
+              plugins: {
+                legend: {
+                  display: true,
+                },
+                title: {
+                  display: false,
+                },
+              },
+            },
+          });
+        }
+
+        heartRateChart = createSingleLineChart(
+          heartRateCanvasCtx,
+          heartRateChart,
+          "Average Heart Rate",
+          chartData.heart_rate,
+          colors.heartRate,
+          "Beats Per Minute (BPM)"
+        );
+
+        destroyChart(bloodPressureChart);
+        bloodPressureChart = new Chart(bloodPressureCanvasCtx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Avg Systolic BP",
+                data: chartData.systolic || [],
+                borderColor: colors.systolic,
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1,
+                pointRadius: 3,
+                pointBackgroundColor: colors.systolic,
+              },
+              {
+                label: "Avg Diastolic BP",
+                data: chartData.diastolic || [],
+                borderColor: colors.diastolic,
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1,
+                pointRadius: 3,
+                pointBackgroundColor: colors.diastolic,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: false,
+                title: { display: true, text: "mmHg" },
+              },
+              x: {
+                title: { display: true, text: "Date & Time" },
+                ticks: {
+                  maxTicksLimit: 10,
+                  autoSkip: true,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: true,
+              },
+              title: {
+                display: false,
+              },
+            },
+          },
+        });
+
+        glucoseChart = createSingleLineChart(
+          glucoseCanvasCtx,
+          glucoseChart,
+          "Average Glucose Level",
+          chartData.glucose,
+          colors.glucose,
+          "mg/dL"
+        );
+
+        oxygenChart = createSingleLineChart(
+          oxygenCanvasCtx,
+          oxygenChart,
+          "Average Oxygen Saturation",
+          chartData.oxygen,
+          colors.oxygen,
+          "%"
+        );
+      }
+
+      function displayErrorMessage(message) {
+        const errorDiv = document.getElementById("chartErrorArea");
+        if (errorDiv) {
+          errorDiv.textContent = message;
+          errorDiv.style.display = "block";
+        } else {
+          console.error("Displaying error (fallback):", message);
+          alert(message);
+        }
+      }
+
+      function clearErrorMessage() {
+        const errorDiv = document.getElementById("chartErrorArea");
+        if (errorDiv) {
+          errorDiv.textContent = "";
+          errorDiv.style.display = "none";
+        }
+      }
+
+      fetchData();
+
+      periodSelect.addEventListener("change", (event) => {
+        fetchData(event.target.value);
+      });
+    </script>
+  </body>
+</html>

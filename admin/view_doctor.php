@@ -28,11 +28,11 @@ if ($doctor_id <= 0) {
     die("Invalid doctor ID.");
 }
 
-// Verify doctor belongs to admin's organization
+// Verify doctor belongs to admin's organization and include archived status
 $stmt = $conn->prepare("SELECT d.Doctor_ID, u.Full_Name, d.Specialization, d.License_Number, u.EMAIL
                        FROM Doctor d
                        JOIN User u ON d.User_ID = u.User_ID
-                       WHERE d.Doctor_ID = ? AND d.Organization_ID = ?");
+                       WHERE d.Doctor_ID = ? AND d.Organization_ID = ? AND u.status IN ('active', 'archived')");
 $stmt->bind_param("ii", $doctor_id, $organization_id);
 $stmt->execute();
 $result = $stmt->get_result();
