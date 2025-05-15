@@ -247,9 +247,9 @@ $doctor = $result->fetch_assoc();
             <a href="doctor/progress_report.php?doctor_id=<?php echo $doctor_id; ?>" class="dashboard-card btn-primary">
                 <i class="fas fa-file-medical"></i> View Generated Reports
             </a>
-            <a href="doctor/patients.php?doctor_id=<?php echo $doctor_id; ?>" class="dashboard-card btn-primary">
-                <i class="fas fa-user-injured"></i> View Patients
-            </a>
+<a href="view_doctor_patients.php?doctor_id=<?php echo $doctor_id; ?>" class="dashboard-card btn-primary">
+    <i class="fas fa-user-injured"></i> View Patients
+</a>
         </div>
     </div>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>

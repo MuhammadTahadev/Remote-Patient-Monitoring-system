@@ -292,7 +292,7 @@ if ($organization_id !== null) {
                     <td><?php echo htmlspecialchars($patient['EMAIL']); ?></td>
                     <td>
                             <a href="send_message.php?to=patient&id=<?php echo $patient['Patient_ID']; ?>" class="btn-link">Send Message</a>
-                            <a href="manage_patients.php?delete=<?php echo $patient['Patient_ID']; ?>" class="btn-link" onclick="return confirm('Are you sure you want to delete this patient?');">Delete</a>
+                            <a href="manage_patients.php?delete=<?php echo $patient['Patient_ID']; ?>" class="btn-link" onclick="return confirm('Are you sure you want to delete this patient?');">Disable</a>
                             <a href="view_patient.php?id=<?php echo $patient['Patient_ID']; ?>" class="btn-link">View</a>
                         </td>
                 </tr>

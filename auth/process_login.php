@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Check if user is active
         if ($user['status'] !== 'active') {
-            setAlert("User archived by the admin", "error");
+            setAlert("User disabled by the admin", "error");
             header("Location: login.php");
             exit();
         }
