@@ -164,6 +164,11 @@ while ($org = $organizations->fetch_assoc()) {
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .faq-section.hidden {
+            display: none;
         }
 
         .faq-section h2 {
@@ -232,6 +237,36 @@ while ($org = $organizations->fetch_assoc()) {
             margin: 0;
         }
 
+        /* Floating Help Button */
+        .floating-help {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .floating-help:hover {
+            background-color: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .floating-help:active {
+            background-color: var(--primary-dark);
+            transform: scale(0.95);
+        }
+
         /* Responsive Adjustments for Auth Wrapper */
         @media (max-width: 768px) {
             .auth-wrapper {
@@ -242,6 +277,14 @@ while ($org = $organizations->fetch_assoc()) {
 
             .faq-section {
                 max-width: 100%;
+            }
+
+            .floating-help {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
             }
         }
     </style>
@@ -379,7 +422,7 @@ while ($org = $organizations->fetch_assoc()) {
             Already have an account? <a href="login.php">Login here</a>
         </div>
     </div>
-    <div class="faq-section">
+    <div class="faq-section hidden">
         <h2>Frequently Asked Questions</h2>
         <div class="faq-item">
             <button class="faq-question">What information do I need to register?</button>
@@ -405,7 +448,7 @@ while ($org = $organizations->fetch_assoc()) {
         <div class="faq-item">
             <button class="faq-question">What happens after I register?</button>
             <div class="faq-answer">
-                <p>After submitting your details, you’ll see a confirmation modal to review your information. Once confirmed, your account will be created, and you’ll be redirected to the Login page after entering your login credentials you will be redirected to your dashboard based on the role you selected previously.</p>
+                <p>After submitting your details, you'll see a confirmation modal to review your information. Once confirmed, your account will be created, and you'll be redirected to the Login page after entering your login credentials you will be redirected to your dashboard based on the role you selected previously.</p>
             </div>
         </div>
         <div class="faq-item">
@@ -416,6 +459,9 @@ while ($org = $organizations->fetch_assoc()) {
         </div>
     </div>
 </div>
+
+<!-- Floating Help Button -->
+<div class="floating-help">?</div>
 
 <script>
 const allDoctors = <?php echo json_encode($all_doctors); ?>;
@@ -458,6 +504,17 @@ function showConfirmModal() {
 function hideConfirmModal() {
     const modal = document.getElementById('confirm_modal');
     modal.style.display = 'none';
+}
+
+// Toggle FAQ section visibility
+function toggleFAQ() {
+    const faqSection = document.querySelector('.faq-section');
+    faqSection.classList.toggle('hidden');
+    
+    // Scroll to FAQ section if it's being shown
+    if (!faqSection.classList.contains('hidden')) {
+        faqSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
 document.getElementById('role').addEventListener('change', function() {
@@ -595,6 +652,9 @@ document.querySelectorAll('.faq-question').forEach(button => {
         }
     });
 });
+
+// Floating help button functionality
+document.querySelector('.floating-help').addEventListener('click', toggleFAQ);
 </script>
 </body>
 </html>
