@@ -393,12 +393,12 @@ if ($doctor_user_id) {
 </head>
 <body>
 <!-- Language Selector -->
-<div class="language-selector">
+<!-- <div class="language-selector">
     <select id="language_select" onchange="changeLanguage()">
         <option value="en">English</option>
         <option value="ur">اردو</option>
     </select>
-</div>
+</div> -->
 
 <div class="patient-dashboard">
     <h2 data-i18n="dashboard_title">Patient Dashboard</h2>

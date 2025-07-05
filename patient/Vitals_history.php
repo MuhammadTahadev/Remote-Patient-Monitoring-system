@@ -286,12 +286,12 @@ $notification_count = $stmt->get_result()->fetch_row()[0];
 </head>
 <body>
 <!-- Language Selector -->
-<div class="language-selector">
+<!-- <div class="language-selector">
     <select id="language_select" onchange="changeLanguage()">
         <option value="en">English</option>
         <option value="ur">اردو</option>
     </select>
-</div>
+</div> -->
 
 <div class="patient-container">
     <h2 data-i18n="vitals_history_title">Vitals History</h2>

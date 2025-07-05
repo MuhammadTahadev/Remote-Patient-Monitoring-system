@@ -7,7 +7,7 @@ require_once '../includes/auth.php';
 require_once '../includes/functions.php';
 
 // Verify authentication and role (Patient or Doctor)
-if (!isLoggedIn() || (!hasRole('Doctor') || (!hasRole('Admin')))) {
+if (!isLoggedIn() || (!hasRole('Doctor') && !hasRole('Admin'))) {
     http_response_code(401);
     die(json_encode(['error' => 'Unauthorized']));
 }

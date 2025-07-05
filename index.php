@@ -15,7 +15,7 @@
                 <i class="fas fa-heartbeat"></i>
                 <h1>RPM</h1>
             </div>
-            <nav>
+            <nav class="navbar">
                 <a href="#" class="active">Home</a>|
                 <a href="#features">Features</a>|
                 <a href="#about">About</a>|
@@ -120,7 +120,7 @@
             <div class="footer-links">
                 <h3>Quick Links</h3>
                 <ul>
-                    <li><a href="#">Home</a></li>
+                    <li><a href="#" class="active">Home</a></li>
                     <li><a href="#features">Features</a></li>
                     <li><a href="#about">About Us</a></li>
                     <li><a href="#">Privacy Policy</a></li>
@@ -142,5 +142,7 @@
             <p>&copy; 2025 RPM. All rights reserved.</p>
         </div>
     </footer>
+
+    <script src="nav.js"></script>
 </body>
 </html>

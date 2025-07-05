@@ -4,10 +4,10 @@
 # RPM - Remote Patient Monitoring System
 
 ## Project Description
-RPM is an advanced Remote Patient Monitoring system designed to connect patients and healthcare providers for better health outcomes. The platform enables real-time health tracking, smart alerts, and detailed health reports, facilitating proactive and patient-centered care anytime, anywhere.
+RPM is an advanced Remote Patient Monitoring system designed to connect patients and healthcare providers for better health outcomes. The platform enables manual entry of vital signs by patients with near real-time alert updates to healthcare teams via periodic polling, smart alerts, and detailed health reports, facilitating proactive and patient-centered care anytime, anywhere.
 
 ## Key Features
-- **Real-Time Health Tracking:** Continuous monitoring of vital signs with instant updates to healthcare teams.
+- **Real-Time Health Tracking:** Manual entry of vital signs by patients with near real-time alert updates to healthcare teams via periodic polling.
 - **Smart Alerts:** Automated notifications for concerning health patterns or medication reminders.
 - **Health Reports:** Detailed analytics and reports to track patient progress over time.
 - **Role-Based Access:** Separate dashboards and functionalities for Admins, Doctors, and Patients.
